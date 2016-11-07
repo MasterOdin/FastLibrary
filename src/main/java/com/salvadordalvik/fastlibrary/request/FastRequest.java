@@ -63,7 +63,7 @@ public abstract class FastRequest<T> {
         headers.put(key, value);
     }
 
-    protected String generateUrl(){
+    public String generateUrl(){
         if(method == Request.Method.GET){
             Uri.Builder url = Uri.parse(baseUrl).buildUpon();
             for(Map.Entry<String, String> param : params.entrySet()){
@@ -141,6 +141,7 @@ public abstract class FastRequest<T> {
             if(externalCallback != null){
                 externalCallback.onFailure(FastRequest.this, error);
             }
+            Log.e(FastRequest.this.getClass().getSimpleName(), "Error: "+error.toString());
         }
 
         @Override
