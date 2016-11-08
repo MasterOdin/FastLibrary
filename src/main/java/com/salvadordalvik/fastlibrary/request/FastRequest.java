@@ -1,10 +1,10 @@
 package com.salvadordalvik.fastlibrary.request;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.android.volley.*;
 import com.android.volley.toolbox.HttpHeaderParser;
-import org.apache.http.protocol.HTTP;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +14,8 @@ import java.util.Map;
  * Created by Matthew Shepard on 11/17/13.
  */
 public abstract class FastRequest<T> {
+    private static final String ContentType = "Content-Type";
+
     public interface FastStatusCallback{
         public void onSuccess(FastRequest request);
         public void onFailure(FastRequest request, VolleyError error);
@@ -63,7 +65,7 @@ public abstract class FastRequest<T> {
         headers.put(key, value);
     }
 
-    public String generateUrl(){
+    private String generateUrl(){
         if(method == Request.Method.GET){
             Uri.Builder url = Uri.parse(baseUrl).buildUpon();
             for(Map.Entry<String, String> param : params.entrySet()){
@@ -76,7 +78,7 @@ public abstract class FastRequest<T> {
 
     public abstract T parseResponse(Request<T> request, NetworkResponse response) throws Exception;
 
-    protected byte[] requestBody(){
+    private byte[] requestBody(){
         return null;
     }
 
@@ -138,10 +140,15 @@ public abstract class FastRequest<T> {
             if(error != null){
                 error.printStackTrace();
             }
+
             if(externalCallback != null){
                 externalCallback.onFailure(FastRequest.this, error);
             }
-            Log.e(FastRequest.this.getClass().getSimpleName(), "Error: "+error.toString());
+
+            if (error != null) {
+                Log.e(FastRequest.this.getClass().getSimpleName(), "Error: "+error.toString());
+            }
+
         }
 
         @Override
@@ -174,8 +181,8 @@ public abstract class FastRequest<T> {
         }
     }
 
-    public static String parseCharset(Map<String, String> headers, String fallback){
-        String contentType = headers.get(HTTP.CONTENT_TYPE);
+    static String parseCharset(Map<String, String> headers, String fallback){
+        String contentType = headers.get(ContentType);
         if (contentType != null) {
             String[] params = contentType.split(";");
             for (int i = 1; i < params.length; i++) {
